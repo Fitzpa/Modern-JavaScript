@@ -1,93 +1,88 @@
 # Modern-JavaScript
 
-## Mediator Pattern
+## State Pattern
 ### Definition
-Define an object that encapsulates how a set of objects interact. Mediator promotes loose coupling by keeping objects from referring to each other explicitly, and it lets you vary their interaction independently.
+Allow an object to alter its behavior when its internal state changes. The object will appear to change its class.
 
 Frequency of use (in JavaScript): medium low
 
 ### Summary
-The Mediator pattern provides central authority over a group of objects by encapsulating how these objects interact. This model is useful for scenarios where there is a need to manage complex conditions in which every object is aware of any state change in any other object in the group.
+The State pattern provides state-specific logic to a limited set of objects in which each object represents a particular state. This is best explained with an example.
 
-The Mediator patterns are useful in the development of complex forms. Take for example a page in which you enter options to make a flight reservation. A simple Mediator rule would be: you must enter a valid departure date, a valid return date, the return date must be after the departure date, a valid departure airport, a valid arrival airport, a valid number of travelers, and only then the Search button can be activated.
+Say a customer places an online order for a TV. While this order is being processed it can in one of many states: New, Approved, Packed, Pending, Hold, Shipping, Completed, or Canceled. If all goes well the sequence will be New, Approved, Packed, Shipped, and Completed. However, at any point something unpredictable may happen, such as no inventory, breakage, or customer cancelation. If that happens the order needs to be handled appropriately.
 
-Another example of Mediator is that of a control tower on an airport coordinating arrivals and departures of airplanes.
+Applying the State pattern to this scenario will provide you with 8 State objects, each with its own set of properties (state) and methods (i.e. the rules of acceptable state transitions). State machines are often implemented using the State pattern. These state machines simply have their State objects swapped out with another one when a state transition takes place.
+
+Two other examples where the State pattern is useful include: vending machines that dispense products when a correct combination of coins is entered, and elevator logic which moves riders up or down depending on certain complex rules that attempt to minimize wait and ride times.
 
 ### Example
-In the example code we have four participants that are joining in a chat session by registering with a Chatroom (the Mediator). Each participant is represented by a Participant object. Participants send messages to each other and the Chatroom handles the routing.
+Our example is a traffic light (i.e. TrafficLight object) with 3 different states: Red, Yellow and Green, each with its own set of rules. The rules go like this: Say the traffic light is Red. After a delay the Red state changes to the Green state. Then, after another delay, the Green state changes to the Yellow state. After a very brief delay the Yellow state is changed to Red. And on and on.
 
-This example is simple, but other complex rules could have been added, such as a 'junk filter' to protect participants from receiving junk messages.
+It is important to note that it is the State object that determines the transition to the next state. And it is also the State object that changes the current state in the TrafficLight -- not the TrafficLight itself.
+
+For demonstration purposes, a built-in counter limits the number of state changes, or else the program would run indefinitely.
 
 The log function is a helper which collects and displays results.
 
-`var Participant = function(name) {
-    this.name = name;
-    this.chatroom = null;
-};
+`var TrafficLight = function () {
+    var count = 0;
+    var currentState = new Red(this);
  
-Participant.prototype = {
-    send: function(message, to) {
-        this.chatroom.send(message, this, to);
-    },
-    receive: function(message, from) {
-        log.add(from.name + " to " + this.name + ": " + message);
+    this.change = function (state) {
+        // limits number of changes
+        if (count++ >= 10) return;
+        currentState = state;
+        currentState.go();
+    };
+ 
+    this.start = function () {
+        currentState.go();
+    };
+}
+ 
+var Red = function (light) {
+    this.light = light;
+ 
+    this.go = function () {
+        log.add("Red --> for 1 minute");
+        light.change(new Green(light));
     }
 };
  
-var Chatroom = function() {
-    var participants = {};
+var Yellow = function (light) {
+    this.light = light;
  
-    return {
+    this.go = function () {
+        log.add("Yellow --> for 10 seconds");
+        light.change(new Red(light));
+    }
+};
  
-        register: function(participant) {
-            participants[participant.name] = participant;
-            participant.chatroom = this;
-        },
+var Green = function (light) {
+    this.light = light;
  
-        send: function(message, from, to) {
-            if (to) {                      // single message
-                to.receive(message, from);    
-            } else {                       // broadcast message
-                for (key in participants) {   
-                    if (participants[key] !== from) {
-                        participants[key].receive(message, from);
-                    }
-                }
-            }
-        }
-    };
+    this.go = function () {
+        log.add("Green --> for 1 minute");
+        light.change(new Yellow(light));
+    }
 };
  
 // log helper
  
-var log = (function() {
+var log = (function () {
     var log = "";
  
     return {
-        add: function(msg) { log += msg + "\n"; },
-        show: function() { alert(log); log = ""; }
+        add: function (msg) { log += msg + "\n"; },
+        show: function () { alert(log); log = ""; }
     }
 })();
  
 function run() {
-    var yoko = new Participant("Yoko");
-    var john = new Participant("John");
-    var paul = new Participant("Paul");
-    var ringo = new Participant("Ringo");
- 
-    var chatroom = new Chatroom();
-    chatroom.register(yoko);
-    chatroom.register(john);
-    chatroom.register(paul);
-    chatroom.register(ringo);
- 
-    yoko.send("All you need is love.");
-    yoko.send("I love you John.");
-    john.send("Hey, no need to broadcast", yoko);
-    paul.send("Ha, I heard that!");
-    ringo.send("Paul, what do you think?", paul);
+    var light = new TrafficLight();
+    light.start();
  
     log.show();
 }`
 
-### Read More About The Mediator Pattern [Here](https://www.dofactory.com/javascript/mediator-design-pattern)
+### Read More About The State Pattern [Here](https://www.dofactory.com/javascript/mediator-state-pattern)
