@@ -1,25 +1,48 @@
-const Singleton = (() => {
-    let instance;
+function MemberFactory() {
+    this.createMember = function(name, type) {
+        let member;
 
-    const createInstance = () => {
-        const object = new Object({text: 'Object Instance.'})
-        return object
-    }
-
-    return {
-        getInstance: () => {
-            if(!instance){
-                instance = createInstance();
-            }
-            return instance
+        if(type === 'simple') {
+            member = new SimpleMembership(name)
+        } else if(type === 'standard') {
+            member = new StandardMembership(name)
+        } else if(type === 'super') {
+            member = new SuperMembership(name)
         }
+
+        member.type = type;
+
+        member.define = function() {
+            console.log(`Member: ${this.name},  Membership: ${this.type}, Cost: $${this.cost}`)
+        }
+
+        return member
     }
-})()
+}
 
-const instanceA = Singleton.getInstance()
-const instanceB = Singleton.getInstance()
+const SimpleMembership = function(name) {
+    this.name = name;
+    this.cost = 5;
+}
 
-console.log('instanceA ', instanceA)
-console.log('instanceB ', instanceB)
-console.log('instanceA === instanceB: ', instanceA === instanceB)
-// You can never have more than one instance.
+const StandardMembership = function(name) {
+    this.name = name;
+    this.cost = 15;
+}
+
+const SuperMembership = function(name) {
+    this.name = name;
+    this.cost = 25;
+}
+
+const members = []
+const factory = new MemberFactory();
+
+members.push(factory.createMember('Louie', 'simple'))
+members.push(factory.createMember('Kaite', 'standard'))
+members.push(factory.createMember('Missy', 'super'))
+
+members.forEach((member, index) => {
+    console.log(`Member ${index + 1}`)
+    member.define()
+})
