@@ -1,14 +1,14 @@
-//* ES5 based Object Oriented Programming
-function EventObserver() {
-    this.observers = [];
-}
+//* ES6 Classes
 
-EventObserver.prototype = {
-    subscribe: function(fn) {
+class EventObserver {
+    constructor() {
+        this.observers = [];
+    }
+    subscribe(fn) {
         this.observers.push(fn)
         console.log(`You are now subscribed to ${fn.name}`)
-    },
-    unsubscribe: function(fn) {
+    }
+    unsubscribe(fn) {
         // Here we are filtering out from the list whichever item matches the callback funtion. 
         // If there is no match then the callback stays in the list.
         // filter returns a new list and reassigns the list of observers.
@@ -18,8 +18,8 @@ EventObserver.prototype = {
             }
         }) 
         console.log(`You are now unsubscribed from ${fn.name}`)
-    },
-    fire: function() {
+    }
+    fire() {
         this.observers.forEach(function(item) {
             item.call()
         })
