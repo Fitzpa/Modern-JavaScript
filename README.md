@@ -1,52 +1,62 @@
 # Modern-JavaScript
 
-## Observer Pattern
+## Mediator Pattern
 ### Definition
-Define a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically.
+Define an object that encapsulates how a set of objects interact. Mediator promotes loose coupling by keeping objects from referring to each other explicitly, and it lets you vary their interaction independently.
 
-Frequency of use (in JavaScript): high
+Frequency of use (in JavaScript): medium low
 
 ### Summary
-The Observer pattern offers a subscription model in which objects subscribe to an event and get notified when the event occurs. This pattern is the cornerstone of event driven programming, including JavaScript. The Observer pattern facilitates good object-oriented design and promotes loose coupling.
+The Mediator pattern provides central authority over a group of objects by encapsulating how these objects interact. This model is useful for scenarios where there is a need to manage complex conditions in which every object is aware of any state change in any other object in the group.
 
-When building web apps you end up writing many event handlers. Event handlers are functions that will be notified when a certain event fires. These notifications optionally receive an event argument with details about the event (for example the x and y position of the mouse at a click event).
+The Mediator patterns are useful in the development of complex forms. Take for example a page in which you enter options to make a flight reservation. A simple Mediator rule would be: you must enter a valid departure date, a valid return date, the return date must be after the departure date, a valid departure airport, a valid arrival airport, a valid number of travelers, and only then the Search button can be activated.
 
-The event and event-handler paradigm in JavaScript is the manifestation of the Observer design pattern. Another name for the Observer pattern is Pub/Sub, short for Publication/Subscription.
+Another example of Mediator is that of a control tower on an airport coordinating arrivals and departures of airplanes.
 
 ### Example
-The Click object represents the Subject. The clickHandler function is the subscribing Observer. This handler subscribes, unsubscribes, and then subscribes itself while events are firing. It gets notified only of events #1 and #3.
+In the example code we have four participants that are joining in a chat session by registering with a Chatroom (the Mediator). Each participant is represented by a Participant object. Participants send messages to each other and the Chatroom handles the routing.
 
-Notice that the fire method accepts two arguments. The first one has details about the event and the second one is the context, that is, the this value for when the eventhandlers are called. If no context is provided this will be bound to the global object (window).
+This example is simple, but other complex rules could have been added, such as a 'junk filter' to protect participants from receiving junk messages.
 
 The log function is a helper which collects and displays results.
 
-`function Click() {
-    this.handlers = [];  // observers
-}
+`var Participant = function(name) {
+    this.name = name;
+    this.chatroom = null;
+};
  
-Click.prototype = {
- 
-    subscribe: function(fn) {
-        this.handlers.push(fn);
+Participant.prototype = {
+    send: function(message, to) {
+        this.chatroom.send(message, this, to);
     },
+    receive: function(message, from) {
+        log.add(from.name + " to " + this.name + ": " + message);
+    }
+};
  
-    unsubscribe: function(fn) {
-        this.handlers = this.handlers.filter(
-            function(item) {
-                if (item !== fn) {
-                    return item;
+var Chatroom = function() {
+    var participants = {};
+ 
+    return {
+ 
+        register: function(participant) {
+            participants[participant.name] = participant;
+            participant.chatroom = this;
+        },
+ 
+        send: function(message, from, to) {
+            if (to) {                      // single message
+                to.receive(message, from);    
+            } else {                       // broadcast message
+                for (key in participants) {   
+                    if (participants[key] !== from) {
+                        participants[key].receive(message, from);
+                    }
                 }
             }
-        );
-    },
- 
-    fire: function(o, thisObj) {
-        var scope = thisObj || window;
-        this.handlers.forEach(function(item) {
-            item.call(scope, o);
-        });
-    }
-}
+        }
+    };
+};
  
 // log helper
  
@@ -60,21 +70,24 @@ var log = (function() {
 })();
  
 function run() {
+    var yoko = new Participant("Yoko");
+    var john = new Participant("John");
+    var paul = new Participant("Paul");
+    var ringo = new Participant("Ringo");
  
-    var clickHandler = function(item) { 
-        log.add("fired: " + item); 
-    };
+    var chatroom = new Chatroom();
+    chatroom.register(yoko);
+    chatroom.register(john);
+    chatroom.register(paul);
+    chatroom.register(ringo);
  
-    var click = new Click();
- 
-    click.subscribe(clickHandler);
-    click.fire('event #1');
-    click.unsubscribe(clickHandler);
-    click.fire('event #2');
-    click.subscribe(clickHandler);
-    click.fire('event #3');
+    yoko.send("All you need is love.");
+    yoko.send("I love you John.");
+    john.send("Hey, no need to broadcast", yoko);
+    paul.send("Ha, I heard that!");
+    ringo.send("Paul, what do you think?", paul);
  
     log.show();
 }`
 
-### Read More About The Observer Pattern [Here](https://www.dofactory.com/javascript/observer-design-pattern)
+### Read More About The Mediator Pattern [Here](https://www.dofactory.com/javascript/mediator-design-pattern)
