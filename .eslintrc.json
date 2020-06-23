@@ -3,7 +3,7 @@
   "env": {
     "browser": true,
     "commonjs": true,
-    "es6": true,
+    "es6": false,
     "jest": true,
     "node": true
   },
@@ -11,6 +11,13 @@
     "jsx-a11y/href-no-hash": ["off"],
     "react/jsx-filename-extension": ["warn", { "extensions": [".js", ".jsx"] }],
     "no-unused-vars": "warn",
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
+    ],
+    "func-names": ["error", "never"],
     "max-len": [
       "warn",
       {
