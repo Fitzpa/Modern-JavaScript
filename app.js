@@ -28,6 +28,24 @@ const ItemController = (function () {
     logState() {
       return state;
     },
+    addItem(name, calories) {
+      let ID;
+      const cal = +calories;
+      // Create ID and increment it by 1 for each item
+      if (state.items.length > 0) {
+        ID = state.items[state.items.length - 1].id + 1;
+      } else {
+        ID = 0;
+      }
+
+      // Create new item
+      const newItem = new Item(ID, name, cal);
+
+      // updating state with new item
+      state.items.push(newItem);
+
+      return newItem;
+    },
   };
 })();
 
@@ -35,6 +53,9 @@ const ItemController = (function () {
 const UIController = (function () {
   const UISelectors = {
     itemList: '#item-list',
+    addBtn: '.add-btn',
+    itemNameInput: '#item-name',
+    itemCaloriesInput: '#item-calories',
   };
   // Public Methods
   return {
@@ -51,11 +72,46 @@ const UIController = (function () {
       // Insert List Items
       document.querySelector(UISelectors.itemList).innerHTML = html;
     },
+    getSelectors() {
+      return UISelectors;
+    },
+    getItemInput() {
+      return {
+        name: document.querySelector(UISelectors.itemNameInput).value,
+        calories: document.querySelector(UISelectors.itemCaloriesInput).value,
+      };
+    },
   };
 })();
 
 // App Controller
 const AppController = (function (ItemController, UIController) {
+  // Add Item Submit
+  const itemAddSubmit = function (e) {
+    // Get for input from UI Controller
+    const input = UIController.getItemInput();
+
+    // Validation
+    // Check for name and calorie input
+    if (input.name !== '' && input.calories !== '') {
+      // Add Item from Item Controller
+      const newItem = ItemController.addItem(input.name, input.calories);
+    }
+
+    e.preventDefault();
+  };
+
+  // Load Event Listeners
+  const loadEventListeners = function () {
+    // Get UI Selectors from the UIController
+    const UISelectors = UIController.getSelectors();
+
+    // Add Item Event
+    document
+      .querySelector(UISelectors.addBtn)
+      .addEventListener('click', itemAddSubmit);
+  };
+
   // Public Methods
   return {
     init() {
@@ -65,6 +121,9 @@ const AppController = (function (ItemController, UIController) {
 
       // Populate list with items
       UIController.populateItemList(items);
+
+      // Load Event Listeners
+      loadEventListeners();
     },
   };
 })(ItemController, UIController);
